@@ -1,0 +1,43 @@
+name: Android CI
+
+on:
+  push:
+    #branches: [ master ]
+  pull_request:
+    #branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: setup android-ndk
+      uses: nttld/setup-ndk@v1
+      with:
+        ndk-version: r23
+        add-to-path: true
+
+    - name: setup project64
+      run: |
+       pushd Android/Script/
+       ./Setup.cmd
+       popd
+
+    - name: set up JDK 11
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        cache: gradle
+
+    - name: Grant execute permission for gradlew
+      run: |
+       cd Android
+       chmod +x gradlew.bat
+    - name: Build with Gradle
+      run: |
+       cd Android/app
+       ../gradlew.bat assembleRelease
